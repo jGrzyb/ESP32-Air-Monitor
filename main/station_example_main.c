@@ -24,9 +24,9 @@ static bool isConnected = false;
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
-#define WEB_SERVER "https://www.wp.pl"
+#define WEB_SERVER "www.columbia.edu"
 #define WEB_PORT "80"
-#define REQUEST "GET / HTTP/1.1\r\nHost: https://www.wp.pl\r\n\r\n"
+#define REQUEST "GET /~fdc/sample.html HTTP/1.1\r\nHost: www.columbia.edu\r\n\r\n"
 
 static const char *TAG = "HTTP_CLIENT";
 
