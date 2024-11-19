@@ -6,6 +6,8 @@
 static EventGroupHandle_t s_wifi_event_group;
 static int s_retry_num = 0;
 static bool isConnected = false;
+extern uint8_t ssid[32];
+extern uint8_t password[64];
 
 static const char *TAG = "HTTP_CLIENT";
 
@@ -37,6 +39,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
             ESP_LOGI(TAG, "retry to connect to the AP");
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+            onWifiFailded();
         }
         ESP_LOGI(TAG, "connect to the AP fail");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
@@ -45,6 +48,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
         s_retry_num = 0;
         isConnected = true;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+        onWifiConnected();
     }
 }
 
@@ -73,10 +77,12 @@ void wifi_init_sta(void) {
 
     wifi_config_t wifi_config = {
         .sta = {
-            .ssid = WIFI_SSID,
-            .password = WIFI_PASS,
+            .ssid = {0},
+            .password = {0},
         },
     };
+    strcpy((char *)wifi_config.sta.ssid, (char *)ssid);
+    strcpy((char *)wifi_config.sta.password, (char *)password);
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
