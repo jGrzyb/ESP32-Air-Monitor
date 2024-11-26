@@ -32,8 +32,8 @@
 #include "freertos/FreeRTOS.h"
 
 #define GATTC_TAG "GATTC_DEMO"
-#define REMOTE_SERVICE_UUID        0x180F
-#define REMOTE_NOTIFY_CHAR_UUID    0x2A19
+#define REMOTE_SERVICE_UUID        0xFFE0
+#define REMOTE_NOTIFY_CHAR_UUID    0xFFE1
 #define PROFILE_NUM      1
 #define PROFILE_A_APP_ID 0
 #define INVALID_HANDLE   0
