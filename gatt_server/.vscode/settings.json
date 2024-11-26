@@ -6,6 +6,8 @@
   "files.associations": {
     "main.h": "c",
     "gatts_demo.h": "c",
-    "nvs_manager.h": "c"
+    "nvs_manager.h": "c",
+    "station_example_main.h": "c",
+    "nvs_flash.h": "c"
   }
 }

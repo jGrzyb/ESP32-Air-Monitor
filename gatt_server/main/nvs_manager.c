@@ -7,7 +7,7 @@ void save_to_nvs(const char* key, const char* value) {
     nvs_handle_t my_handle;
     esp_err_t err;
 
-    err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &my_handle);
+    err = nvs_open(key, NVS_READWRITE, &my_handle);
     ESP_ERROR_CHECK(err);
     err = nvs_set_str(my_handle, key, value);
     ESP_ERROR_CHECK(err);
@@ -21,7 +21,7 @@ void read_from_nvs(const char* key, char* value, size_t max_len) {
     esp_err_t err;
     size_t len;
 
-    err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &my_handle);
+    err = nvs_open(key, NVS_READWRITE, &my_handle);
     ESP_ERROR_CHECK(err);
     err = nvs_get_str(my_handle, key, NULL, &len);
     if(err != ESP_OK) {return;}
@@ -38,7 +38,7 @@ void remove_from_nvs(const char* key) {
     nvs_handle_t my_handle;
     esp_err_t err;
 
-    err = nvs_open(STORAGE_NAMESPACE, NVS_READWRITE, &my_handle);
+    err = nvs_open(key, NVS_READWRITE, &my_handle);
     ESP_ERROR_CHECK(err);
     err = nvs_erase_key(my_handle, key);
     ESP_ERROR_CHECK(err);

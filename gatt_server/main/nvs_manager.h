@@ -6,7 +6,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#define STORAGE_NAMESPACE "wifi_config"
+#define SSID_KEY "ssid"
+#define PASSWORD_KEY "pass"
 
 void save_to_nvs(const char* key, const char* value);
 void read_from_nvs(const char* key, char* value, size_t max_len);

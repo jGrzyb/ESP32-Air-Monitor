@@ -3,52 +3,44 @@
 uint8_t ssid[32] = {0};
 uint8_t password[64] = {0};
 
-static bool wifi_init = false;
+bool was_ssid_set = false;
+bool was_password_set = false;
 
-void set_wifi_config(char* value, char* ssid, char* password) {
-    char *token = strtok((char *)value, " ");
-    if (token != NULL) {
-        strncpy((char *)ssid, token, 32 - 1);
-        ssid[32 - 1] = '\0';
-        token = strtok(NULL, " ");
-        if (token != NULL) {
-            strncpy((char *)password, token, 64 - 1);
-            password[64 - 1] = '\0';
-        }
+static void if_wifi_configured() {
+    if(was_ssid_set && was_password_set) {
+        save_to_nvs(SSID_KEY, (char*)ssid);
+        save_to_nvs(PASSWORD_KEY, (char*)password);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        esp_restart();
     }
 }
 
-void wifi_config_to_string(char* value, char* ssid, char* password) {
-    snprintf(value, 96, "%s %s", ssid, password);
+void onBluetoothWrite_a(uint8_t* arrPtr, int len) {
+    memcpy(ssid, arrPtr, len);
+    ssid[len] = '\0';
+    was_ssid_set = true;
+    if_wifi_configured();
+}
+void onBluetoothRead_a(esp_gatt_rsp_t* rsp) {
+    rsp->attr_value.len = strlen((char*)ssid);
+    memcpy(rsp->attr_value.value, ssid, strlen((char*)ssid));
 }
 
-void onBluetoothWrite(uint8_t* arrPtr, int len) {
-    if (bluetoothMessage != NULL) {
-        free(bluetoothMessage);
-    }
-    bluetoothMessage = (uint8_t*)malloc(len+1);
-    memcpy(bluetoothMessage, arrPtr, len);
-    bluetoothMessage[len] = '\0';
-    bluetoothMessage_len = len;
-    set_wifi_config((char*)bluetoothMessage, (char*)ssid, (char*)password);
-    if(!wifi_init) {
-        wifi_init_sta();
-        wifi_init = true;
-    }
+void onBluetoothWrite_b(uint8_t* arrPtr, int len) {
+    memcpy(password, arrPtr, len);
+    password[len] = '\0';
+    was_password_set = true;
+    if_wifi_configured();
 }
-void onBluetoothRead(esp_gatt_rsp_t* rsp) {
-    rsp->attr_value.len = bluetoothMessage_len;
-    memcpy(rsp->attr_value.value, bluetoothMessage, bluetoothMessage_len);
+void onBluetoothRead_b(esp_gatt_rsp_t* rsp) {
+    rsp->attr_value.len = strlen((char*)password);
+    memcpy(rsp->attr_value.value, password, strlen((char*)password));
 }
 
 void onWifiConnected(void) {
-    char nvs_wifi_config[96] = {0};
-    wifi_config_to_string(nvs_wifi_config, (char*)ssid, (char*)password);
-    save_to_nvs(WIFI_CONFIG_KEY, nvs_wifi_config);
     xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
 }
 void onWifiFailded(void) {
-    remove_from_nvs(WIFI_CONFIG_KEY);
     esp_restart();
 }
 
@@ -63,15 +55,11 @@ void app_main(void)
     }
     ESP_ERROR_CHECK( ret );
 
-    char nvs_wifi_config[96] = {0};
-    read_from_nvs(WIFI_CONFIG_KEY, nvs_wifi_config, sizeof(nvs_wifi_config) - 1);
-    set_wifi_config(nvs_wifi_config, (char*)ssid, (char*)password);
-    if(strlen(nvs_wifi_config) > 0) {
-        wifi_init_sta();
-    }
-    else {
-        bluetoothInit();
-    }
+    read_from_nvs(SSID_KEY, (char*)ssid, sizeof(ssid) - 1);
+    read_from_nvs(PASSWORD_KEY, (char*)password, sizeof(password) - 1);
+
+    wifi_init_sta();
+    bluetoothInit();
 
     esp_rom_gpio_pad_select_gpio(LED_PIN);
     gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
