@@ -1,4 +1,6 @@
 import paho.mqtt.client as mqtt
+import json
+import threading
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, reason_code, properties):
@@ -9,7 +11,10 @@ def on_connect(client, userdata, flags, reason_code, properties):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload.decode('utf-8')))
+    d = json.loads(str(msg.payload.decode('utf-8')))
+    for k in d:
+        print(k, ":", d[k])
+    print()
 
 mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 mqttc.on_connect = on_connect
@@ -21,4 +26,13 @@ mqttc.connect("mqtt.eclipseprojects.io", 1883, 60)
 # handles reconnecting.
 # Other loop*() functions are available that give a threaded interface and a
 # manual interface.
-mqttc.loop_forever()
+mqtt_thread = threading.Thread(target=mqttc.loop_forever)
+mqtt_thread.start()
+
+while True:
+    user_input = input()
+    try:
+        freq = int(user_input)
+        mqttc.publish("/user1/in/F8:B3:B7:21:2C:7D", freq)
+    except ValueError:
+        print("Invalid input. Please enter an integer.")

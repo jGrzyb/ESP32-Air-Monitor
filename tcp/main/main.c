@@ -10,9 +10,9 @@ static uint8_t mac[6] = {0};
 static void whenMqttConnected() {
     while(isMqttConnected) {
         char message[128];
-        snprintf(message, sizeof(message), "%d", rand());
-
         int msg_id = esp_mqtt_client_publish(client, topic, message, 0, 1, 0);
+        snprintf(message, sizeof(message), "{\"id\":%d, \"temperature\":%d, \"pressure\":%d, \"moisture\": %d}", msg_id, rand(), rand(), rand());
+        
         ESP_LOGI(TAG_MQTT, "sent publish successful, msg_id=%d", msg_id);
         ESP_LOGI(TAG_MQTT, "FREQ: %d", freq);
         vTaskDelay(freq * 1000 / portTICK_PERIOD_MS);
