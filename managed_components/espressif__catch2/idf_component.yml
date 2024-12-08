@@ -1,0 +1,12 @@
+dependencies:
+  idf: '>=5.0.0'
+description: A modern, C++-native, test framework for unit-tests, TDD and BDD - using
+  C++14, C++17 and later
+documentation: https://github.com/catchorg/Catch2/tree/devel/docs
+issues: https://github.com/espressif/idf-extra-components/issues
+repository: git://github.com/espressif/idf-extra-components.git
+repository_info:
+  commit_sha: 91f4061ec85b2184e004a17420a3876b3811fdfa
+  path: catch2
+url: https://github.com/espressif/idf-extra-components/tree/master/catch2
+version: 3.7.0

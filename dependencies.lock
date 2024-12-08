@@ -1,0 +1,21 @@
+dependencies:
+  espressif/catch2:
+    component_hash: 929d9f3b060c044670a666b62bdbb2acf3d5999ae72bdb2b82463bcd0746192a
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 3.7.0
+  idf:
+    source:
+      type: idf
+    version: 5.3.2
+direct_dependencies:
+- espressif/catch2
+- idf
+manifest_hash: cc4546fe08da8a91e764ef0fc54de3f0732db50c84c2e519fcef09b0aeb6428e
+target: esp32
+version: 2.0.0

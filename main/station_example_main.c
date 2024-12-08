@@ -1,4 +1,5 @@
 #include <string.h>
+#include "esp_mac.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -8,8 +9,8 @@
 #include "nvs_flash.h"
 #include "driver/gpio.h"
 
-#define WIFI_SSID "Galaxy A04s 5A7C"
-#define WIFI_PASS "vino9495"
+#define WIFI_SSID "Galaxy A55" //"Galaxy A04s 5A7C"
+#define WIFI_PASS "12347890" //"vino9495"
 #define MAX_RETRY 10
 #define LED_PIN GPIO_NUM_2 // LED na GPIO2 w ESP32
 
