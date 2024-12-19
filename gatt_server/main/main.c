@@ -23,7 +23,7 @@ static void if_wifi_configured() {
     if(was_ssid_set && was_password_set) {
         save_to_nvs(SSID_KEY, (char*)ssid);
         save_to_nvs(PASSWORD_KEY, (char*)password);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        // vTaskDelay(1000 / portTICK_PERIOD_MS);
         esp_restart();
     }
 }
@@ -61,28 +61,20 @@ void onWifiFailded(void) {
 
 
 
-static void whenMqttConnected() {
-    while(isMqttConnected) {
-        mqttSendMessage();
-        vTaskDelay(freq * 1000 / portTICK_PERIOD_MS);
-    }
-    vTaskDelete(NULL);
-}
-
 void onMqttConnected(esp_mqtt_client_handle_t c) {
     client = c;
     isMqttConnected = true;
-    xTaskCreate(&whenMqttConnected, "mqttConnectedTask", 4096, NULL, 5, NULL);
+    // xTaskCreate(&whenMqttConnected, "mqttConnectedTask", 4096, NULL, 5, NULL);
 }
 
 void onMqttDisconnected() {
     isMqttConnected = false;
 }
 
-void onMqttMessageReceived(char* data, int len) {
-    char temp[len + 1];
-    strncpy(temp, data, len);
-    temp[len] = '\0';
+void onMqttMessageReceived(char* data, int data_len) {
+    char temp[data_len + 1];
+    strncpy(temp, data, data_len);
+    temp[data_len] = '\0';
 
     char* end;
     long value = strtol(temp, &end, 10);
@@ -92,16 +84,41 @@ void onMqttMessageReceived(char* data, int len) {
     freq = value;
 }
 
-void mqttSendMessage() {
-    char message[128];
-    snprintf(message, sizeof(message), "{\"id\":%llu, \"temperature\":%d, \"pressure\":%d, \"moisture\": %d}", msg_id, rand(), rand(), rand());
-    msg_id++;
-    esp_mqtt_client_publish(client, topic, message, 0, 1, 0);
+// void mqttSendMessage() {
+//     char message[128];
+//     snprintf(message, sizeof(message), "{\"id\":%llu, \"temperature\":%d, \"pressure\":%d, \"moisture\": %d}", msg_id, rand(), rand(), rand());
+//     msg_id++;
+//     esp_mqtt_client_publish(client, topic, message, 0, 1, 0);
     
-    ESP_LOGI(TAG_MQTT, "sent publish successful, msg_id=%llu", msg_id);
-    ESP_LOGI(TAG_MQTT, "FREQ: %d", freq);
-}
+//     ESP_LOGI(TAG_MQTT, "sent publish successful, msg_id=%llu", msg_id);
+//     ESP_LOGI(TAG_MQTT, "FREQ: %d", freq);
+// }
 
+// void i2c_task() {
+//     while(true) {
+//         float temperature, pressure, humidity;
+//         read_sensor_data(&temperature, &pressure, &humidity);
+//         ESP_LOGI("I2C", "Temperature: %.2f °C, Pressure: %.2f hPa, Humidity: %.2f %%RH", temperature, pressure, humidity);
+//         vTaskDelay(1000 / portTICK_PERIOD_MS);
+//     }
+// }
+
+
+void getSendData() {
+    while(true) {
+        float temperature, pressure, humidity;
+        esp_err_t ret = read_sensor_data(&temperature, &pressure, &humidity);
+        ESP_LOGI("I2C", "Temperature: %.2f °C, Pressure: %.2f hPa, Humidity: %.2f %%RH", temperature, pressure, humidity);
+
+        char message[128];
+        snprintf(message, sizeof(message), "{\"id\":%llu, \"temperature\":%f, \"pressure\":%f, \"moisture\": %f}", msg_id, temperature, pressure, humidity);
+        msg_id++;
+        esp_mqtt_client_publish(client, topic, message, 0, 1, 0);
+        ESP_LOGI(TAG_MQTT, "sent publish successful, msg_id=%llu, freq=%d", msg_id, freq);
+
+        vTaskDelay(10000 / portTICK_PERIOD_MS);
+    }
+}
 
 
 
@@ -124,6 +141,12 @@ void app_main(void)
         "/user1/out/%02X:%02X:%02X:%02X:%02X:%02X", 
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
     );
+
+
+
+    i2c_start();
+    xTaskCreate(&getSendData, "getSendData", 4096, NULL, 5, NULL);
+    // xTaskCreate(&i2c_task, "i2c_task", 4096, NULL, 5, NULL);
 
 
 

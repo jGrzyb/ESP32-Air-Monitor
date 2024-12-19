@@ -5,6 +5,7 @@
 #include "gatts_demo.h"
 #include "nvs_manager.h"
 #include "mqtt.h"
+#include "i2c.h"
 
 // on bluetooth write event
 void onBluetoothWrite_a(uint8_t* arrPtr, int len);
