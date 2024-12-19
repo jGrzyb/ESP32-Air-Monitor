@@ -6,6 +6,19 @@ uint8_t password[64] = {0};
 bool was_ssid_set = false;
 bool was_password_set = false;
 
+
+
+static const char *TAG_MQTT = "mqtt_example";
+static uint8_t freq = 10;
+static bool isMqttConnected = false;
+static esp_mqtt_client_handle_t client;
+static char topic[128] = {0};
+static uint8_t mac[6] = {0};
+static uint64_t msg_id = 0;
+
+
+
+
 static void if_wifi_configured() {
     if(was_ssid_set && was_password_set) {
         save_to_nvs(SSID_KEY, (char*)ssid);
@@ -38,11 +51,59 @@ void onBluetoothRead_b(esp_gatt_rsp_t* rsp) {
 }
 
 void onWifiConnected(void) {
-    xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
+    // xTaskCreate(&http_get_task, "http_get_task", 4096, NULL, 5, NULL);
+    mqtt_start();
 }
 void onWifiFailded(void) {
-    esp_restart();
+    // esp_restart();
 }
+
+
+
+
+static void whenMqttConnected() {
+    while(isMqttConnected) {
+        mqttSendMessage();
+        vTaskDelay(freq * 1000 / portTICK_PERIOD_MS);
+    }
+    vTaskDelete(NULL);
+}
+
+void onMqttConnected(esp_mqtt_client_handle_t c) {
+    client = c;
+    isMqttConnected = true;
+    xTaskCreate(&whenMqttConnected, "mqttConnectedTask", 4096, NULL, 5, NULL);
+}
+
+void onMqttDisconnected() {
+    isMqttConnected = false;
+}
+
+void onMqttMessageReceived(char* data, int len) {
+    char temp[len + 1];
+    strncpy(temp, data, len);
+    temp[len] = '\0';
+
+    char* end;
+    long value = strtol(temp, &end, 10);
+    if(value <= 0) {
+        value = 10;
+    }
+    freq = value;
+}
+
+void mqttSendMessage() {
+    char message[128];
+    snprintf(message, sizeof(message), "{\"id\":%llu, \"temperature\":%d, \"pressure\":%d, \"moisture\": %d}", msg_id, rand(), rand(), rand());
+    msg_id++;
+    esp_mqtt_client_publish(client, topic, message, 0, 1, 0);
+    
+    ESP_LOGI(TAG_MQTT, "sent publish successful, msg_id=%llu", msg_id);
+    ESP_LOGI(TAG_MQTT, "FREQ: %d", freq);
+}
+
+
+
 
 void app_main(void)
 {
@@ -54,6 +115,17 @@ void app_main(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK( ret );
+
+
+
+    esp_read_mac(mac, CONFIG_ESP_MAC_ADDR_UNIVERSE_WIFI_STA);
+    snprintf(
+        topic, sizeof(topic), 
+        "/user1/out/%02X:%02X:%02X:%02X:%02X:%02X", 
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
+    );
+
+
 
     read_from_nvs(SSID_KEY, (char*)ssid, sizeof(ssid) - 1);
     read_from_nvs(PASSWORD_KEY, (char*)password, sizeof(password) - 1);
