@@ -52,7 +52,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         esp_read_mac((uint8_t*)topic, CONFIG_ESP_MAC_ADDR_UNIVERSE_WIFI_STA);
         snprintf(
             topic, sizeof(topic), 
-            "/user1/in/%02X:%02X:%02X:%02X:%02X:%02X", 
+            "/esp/%02X:%02X:%02X:%02X:%02X:%02X/in/#", 
             topic[0], topic[1], topic[2], topic[3], topic[4], topic[5]
         );
 
@@ -82,7 +82,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         ESP_LOGI(TAG, "MQTT_EVENT_DATA");
         printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
         printf("DATA=%.*s\r\n", event->data_len, event->data);
-        onMqttMessageReceived(event->data, event->data_len);
+        onMqttMessageReceived(event->data, event->data_len, event->topic, event->topic_len);
         break;
     case MQTT_EVENT_ERROR:
         onMqttDisconnected();

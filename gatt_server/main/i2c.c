@@ -215,7 +215,14 @@ esp_err_t read_sensor_data(float* temperature, float* pressure, float* humidity)
     }
 }
 
-    
+esp_err_t i2c_set_freq(uint8_t f) {
+    esp_err_t ret = mpu9250_register_write_byte(BME280_CONFIG_REG, f);
+    if(ret != ESP_OK) {
+        ESP_LOGE(TAG_I2C, "Could not set frequency");
+    }
+    return ret;
+}
+
 
 
 void i2c_start() {

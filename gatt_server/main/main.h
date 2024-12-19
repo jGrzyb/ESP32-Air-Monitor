@@ -6,6 +6,7 @@
 #include "nvs_manager.h"
 #include "mqtt.h"
 #include "i2c.h"
+#include "esp_sntp.h"
 
 // on bluetooth write event
 void onBluetoothWrite_a(uint8_t* arrPtr, int len);
@@ -21,7 +22,7 @@ void onWifiFailded(void);
 
 void onMqttConnected();
 void onMqttDisconnected();
-void onMqttMessageReceived(char* data, int len);
+void onMqttMessageReceived(char* data, int data_len, char* topic, int topic_len);
 void mqttSendMessage();
 
 
