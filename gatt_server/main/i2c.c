@@ -3,7 +3,7 @@
    Simple I2C example that shows how to initialize I2C
    as well as reading and writing from and to registers for a sensor connected over I2C.
 
-   The sensor used in this example is a MPU9250 inertial measurement unit.
+   The sensor used in this example is a bme280 inertial measurement unit.
 
    For other examples please check:
    https://github.com/espressif/esp-idf/tree/master/examples
@@ -32,12 +32,12 @@ static int8_t dig_H6;
 
 
 
-static esp_err_t mpu9250_register_read(uint8_t reg_addr, uint8_t *data, size_t len)
+static esp_err_t bme280_register_read(uint8_t reg_addr, uint8_t *data, size_t len)
 {
     return i2c_master_write_read_device(I2C_MASTER_NUM, BME280_SENSOR_ADDR, &reg_addr, 1, data, len, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
 }
 
-static esp_err_t mpu9250_register_write_byte(uint8_t reg_addr, uint8_t data)
+static esp_err_t bme280_register_write_byte(uint8_t reg_addr, uint8_t data)
 {
     int ret;
     uint8_t write_buf[2] = {reg_addr, data};
@@ -71,13 +71,13 @@ static esp_err_t i2c_master_init(void)
 static esp_err_t bme280_configure_sensor(void)
 {
     // Set humidity oversampling to x1
-    ESP_ERROR_CHECK(mpu9250_register_write_byte(BME280_CTRL_HUM_REG, 0x01));
+    ESP_ERROR_CHECK(bme280_register_write_byte(BME280_CTRL_HUM_REG, 0x01));
 
     // Set temperature and pressure oversampling to x1 and mode to normal
-    ESP_ERROR_CHECK(mpu9250_register_write_byte(BME280_CTRL_MEAS_REG, 0x27));
+    ESP_ERROR_CHECK(bme280_register_write_byte(BME280_CTRL_MEAS_REG, 0x27));
 
     // Set IIR filter to off and standby time to 0.5ms
-    ESP_ERROR_CHECK(mpu9250_register_write_byte(BME280_CONFIG_REG, 0x00));
+    ESP_ERROR_CHECK(bme280_register_write_byte(BME280_CONFIG_REG, 0x00));
 
     ESP_LOGI(TAG_I2C, "BME280 configured successfully");
     return ESP_OK;
@@ -88,7 +88,7 @@ static esp_err_t bme280_read_calibration_data(void)
     uint8_t buffer[26];
 
     // Read 26 bytes from 0x88 to 0xA1 for temperature and pressure calibration
-    ESP_ERROR_CHECK(mpu9250_register_read(0x88, buffer, 26));
+    ESP_ERROR_CHECK(bme280_register_read(0x88, buffer, 26));
 
     dig_T1 = (buffer[1] << 8) | buffer[0];
     dig_T2 = (buffer[3] << 8) | buffer[2];
@@ -108,7 +108,7 @@ static esp_err_t bme280_read_calibration_data(void)
 
     // Read humidity calibration from 0xE1 to 0xE7
     uint8_t hum_buffer[7];
-    ESP_ERROR_CHECK(mpu9250_register_read(0xE1, hum_buffer, 7));
+    ESP_ERROR_CHECK(bme280_register_read(0xE1, hum_buffer, 7));
 
     dig_H2 = (hum_buffer[1] << 8) | hum_buffer[0];
     dig_H3 = hum_buffer[2];
@@ -184,7 +184,7 @@ static uint32_t compensate_humidity(int32_t adc_H) {
 
 esp_err_t read_sensor_data(float* temperature, float* pressure, float* humidity) {
     uint8_t data[8];
-    esp_err_t ret = mpu9250_register_read(BME280_DATA_START_REG, data, 8);
+    esp_err_t ret = bme280_register_read(BME280_DATA_START_REG, data, 8);
     if(ret != ESP_OK) {
         ESP_LOGE(TAG_I2C, "Could not read sensor data");
         return ret;
@@ -216,7 +216,7 @@ esp_err_t read_sensor_data(float* temperature, float* pressure, float* humidity)
 }
 
 esp_err_t i2c_set_freq(uint8_t f) {
-    esp_err_t ret = mpu9250_register_write_byte(BME280_CONFIG_REG, f);
+    esp_err_t ret = bme280_register_write_byte(BME280_CONFIG_REG, f);
     if(ret != ESP_OK) {
         ESP_LOGE(TAG_I2C, "Could not set frequency");
     }
@@ -244,14 +244,14 @@ void i2c_start() {
 
 //     read_sensor_data();
 
-//     /* Read the MPU9250 WHO_AM_I register, on power up the register should have the value 0x71 */
-//     // ESP_ERROR_CHECK(mpu9250_register_read(BME280_CHIP_ID_REG, data, 1));
+//     /* Read the bme280 WHO_AM_I register, on power up the register should have the value 0x71 */
+//     // ESP_ERROR_CHECK(bme280_register_read(BME280_CHIP_ID_REG, data, 1));
 //     // ESP_LOGI(TAG, "WHO_AM_I = %X", data[0]);
 
 //     vTaskDelay(1000 / portTICK_PERIOD_MS);
     
-//     /* Demonstrate writing by reseting the MPU9250 */
-//     // ESP_ERROR_CHECK(mpu9250_register_write_byte(MPU9250_PWR_MGMT_1_REG_ADDR, 1 << MPU9250_RESET_BIT));
+//     /* Demonstrate writing by reseting the bme280 */
+//     // ESP_ERROR_CHECK(bme280_register_write_byte(bme280_PWR_MGMT_1_REG_ADDR, 1 << bme280_RESET_BIT));
 //     ESP_ERROR_CHECK(i2c_driver_delete(I2C_MASTER_NUM));
 //     ESP_LOGI(TAG, "I2C de-initialized successfully");
 // }

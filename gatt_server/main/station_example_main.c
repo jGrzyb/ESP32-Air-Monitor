@@ -53,6 +53,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
 }
 
 void wifi_init_sta(void) {
+    xTaskCreate(&blink_led_task, "blink_led_task", 2048, NULL, 5, NULL);
     s_wifi_event_group = xEventGroupCreate();
 
     ESP_ERROR_CHECK(esp_netif_init());
