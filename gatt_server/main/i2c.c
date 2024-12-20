@@ -223,6 +223,60 @@ esp_err_t i2c_set_freq(uint8_t f) {
     return ret;
 }
 
+esp_err_t set_humidity_oversampling(uint8_t oversampling) {
+    if (oversampling > 0x05) {
+        ESP_LOGE(TAG_I2C, "Invalid oversampling value for humidity");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    ESP_ERROR_CHECK(bme280_register_write_byte(BME280_CTRL_HUM_REG, oversampling));
+
+    ESP_LOGI(TAG_I2C, "Humidity oversampling set to %d", oversampling);
+    return ESP_OK;
+}
+
+esp_err_t set_temp_press_oversampling(uint8_t temp_oversampling, uint8_t press_oversampling) {
+    if (temp_oversampling > 0x05 || press_oversampling > 0x05) {
+        ESP_LOGE(TAG_I2C, "Invalid oversampling value for temperature or pressure");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t ctrl_meas;
+
+    ESP_ERROR_CHECK(bme280_register_read(BME280_CTRL_MEAS_REG, &ctrl_meas, 1));
+
+    ctrl_meas &= 0x03;
+    ctrl_meas |= (press_oversampling << 5);
+    ctrl_meas |= (temp_oversampling << 2);
+
+    ESP_ERROR_CHECK(bme280_register_write_byte(BME280_CTRL_MEAS_REG, ctrl_meas));
+
+    ESP_LOGI(TAG_I2C, "Temperature oversampling set to %d, Pressure oversampling set to %d",
+             temp_oversampling, press_oversampling);
+    return ESP_OK;
+}
+
+esp_err_t set_iir_filter(uint8_t filter_coefficient) {
+    if (filter_coefficient > 0x04) {
+        ESP_LOGE(TAG_I2C, "Invalid filter coefficient value");
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    uint8_t config;
+
+    ESP_ERROR_CHECK(bme280_register_read(BME280_CONFIG_REG, &config, 1));
+
+    config &= 0xE3;
+    config |= (filter_coefficient << 2);
+
+    ESP_ERROR_CHECK(bme280_register_write_byte(BME280_CONFIG_REG, config));
+    ESP_LOGI(TAG_I2C, "IIR filter coefficient set to %d", filter_coefficient);
+    return ESP_OK;
+}
+
+
+
+
 
 
 void i2c_start() {

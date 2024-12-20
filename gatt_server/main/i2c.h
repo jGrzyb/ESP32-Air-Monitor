@@ -29,9 +29,15 @@
 #define BME280_DATA_START_REG        0xF7  /*!< Starting register for pressure and temperature data */
 #define BME280_HUM_DATA_START_REG    0xFD  /*!< Starting register for humidity data */
 #define BME280_CONFIG_REG            0xF5  /*!< Configuration register for IIR filter and standby time */
+#define BME280_CTRL_HUM_REG 0xF2
+#define BME280_CTRL_MEAS_REG 0xF4
+#define BME280_CONFIG_REG 0xF5
 
 esp_err_t read_sensor_data(float* temperature, float* pressure, float* humidity);
 esp_err_t i2c_set_freq(uint8_t f);
+esp_err_t set_humidity_oversampling(uint8_t oversampling);
+esp_err_t set_temp_press_oversampling(uint8_t temp_oversampling, uint8_t press_oversampling);
+esp_err_t set_iir_filter(uint8_t filter_coefficient);
 
 void i2c_start(void);
 
