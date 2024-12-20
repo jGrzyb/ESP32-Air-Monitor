@@ -148,7 +148,7 @@ void getSendData() {
             char message[128];
             time_t now;
             time(&now);
-            snprintf(message, sizeof(message), "{\"id\":%lld, \"temperature\":%f, \"pressure\":%f, \"moisture\": %f}", (long long)now, temperature, pressure, humidity);
+            snprintf(message, sizeof(message), "{\"time\":%lld, \"temperature\":%f, \"pressure\":%f, \"moisture\": %f}", (long long)now, temperature, pressure, humidity);
             msg_id++;
             esp_mqtt_client_publish(client, topic, message, 0, 1, 0);
             ESP_LOGI(TAG_MQTT, "sent publish successful, msg_id=%llu, freq=%lu", msg_id, sendFreq);
