@@ -35,7 +35,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
         isConnected = false;
         if (s_retry_num < MAX_RETRY) {
             esp_wifi_connect();
-            s_retry_num++;
+            // s_retry_num++;                                                           !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             ESP_LOGI(TAG, "retry to connect to the AP");
         } else {
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
@@ -53,6 +53,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
 }
 
 void wifi_init_sta(void) {
+    xTaskCreate(&blink_led_task, "blink_led_task", 2048, NULL, 5, NULL);
     s_wifi_event_group = xEventGroupCreate();
 
     ESP_ERROR_CHECK(esp_netif_init());
