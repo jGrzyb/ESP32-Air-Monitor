@@ -7,6 +7,7 @@
 #include "mqtt.h"
 #include "i2c.h"
 #include "esp_sntp.h"
+#include "leds.h"
 
 // on bluetooth write event
 void onBluetoothWrite_a(uint8_t* arrPtr, int len);

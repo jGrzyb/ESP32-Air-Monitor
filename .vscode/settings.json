@@ -3,5 +3,5 @@
   "idf.port": "/dev/ttyUSB0",
   "idf.flashType": "UART",
   "idf.adapterTargetName": "esp32",
-  "idf.portWin": "COM3"
+  "idf.portWin": "COM6"
 }

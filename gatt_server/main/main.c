@@ -157,8 +157,6 @@ void getSendData() {
     }
 }
 
-
-
 void app_main(void)
 {
     esp_err_t ret;
@@ -179,12 +177,16 @@ void app_main(void)
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
     );
 
-
+    init_leds();
 
     i2c_start();
     xTaskCreate(&getSendData, "getSendData", 4096, NULL, 5, NULL);
 
-
+    turn_on_BLUE_led();
+    turn_on_RED_led();
+    vTaskDelay(1000);
+    turn_off_BLUE_led();
+    turn_off_RED_led();
 
     read_from_nvs(SSID_KEY, (char*)ssid, sizeof(ssid) - 1);
     read_from_nvs(PASSWORD_KEY, (char*)password, sizeof(password) - 1);
