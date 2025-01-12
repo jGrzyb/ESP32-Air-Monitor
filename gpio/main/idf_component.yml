@@ -1,7 +1,0 @@
-dependencies:
-  cmd_led_indicator:
-    version: '*'
-  idf: '>=4.4'
-  led_indicator:
-    version: '*'
-version: 0.0.1

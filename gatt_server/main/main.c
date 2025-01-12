@@ -159,6 +159,12 @@ void getSendData() {
 
 void app_main(void)
 {
+    red_led_on();
+    green_led_on();
+    vTaskDelay(1000);
+    red_led_off();
+    green_led_off();
+
     esp_err_t ret;
 
     ret = nvs_flash_init();
@@ -181,12 +187,6 @@ void app_main(void)
 
     i2c_start();
     xTaskCreate(&getSendData, "getSendData", 4096, NULL, 5, NULL);
-
-    turn_on_BLUE_led();
-    turn_on_RED_led();
-    vTaskDelay(1000);
-    turn_off_BLUE_led();
-    turn_off_RED_led();
 
     read_from_nvs(SSID_KEY, (char*)ssid, sizeof(ssid) - 1);
     read_from_nvs(PASSWORD_KEY, (char*)password, sizeof(password) - 1);
