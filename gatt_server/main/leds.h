@@ -6,15 +6,15 @@
 #include "esp_log.h"
 #include "driver/gpio.h"
 
-#define RED_LED_PIN GPIO_NUM_17
-#define BLUE_LED_PIN GPIO_NUM_5
+#define RED_LED_GPIO GPIO_NUM_17
+#define GREEN_LED_GPIO GPIO_NUM_16
 
 void init_leds();
 
-void turn_on_RED_led();
-void turn_off_RED_led();
+void red_led_on();
+void red_led_off();
 
-void turn_on_BLUE_led();
-void turn_off_BLUE_led();
+void green_led_on();
+void green_led_off();
 
 #endif // LEDS_H
