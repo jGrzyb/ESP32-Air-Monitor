@@ -16,7 +16,8 @@
     <canvas id="moistureChart"></canvas>
     <script>
         var data = JSON.parse('{{ data | tojson | safe }}');
-        var labels = data.map(d => d.time);
+        data.sort((a, b) => new Date(a.time) - new Date(b.time));
+        var labels = data.map(d => new Date(d.time).toString().slice(0, 24));
 
         new Chart(document.getElementById('temperatureChart').getContext('2d'), {
             type: 'line',

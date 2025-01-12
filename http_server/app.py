@@ -104,7 +104,7 @@ def device_data(mac_address):
     data = SensorData.query.filter_by(device_id=device.id).order_by(SensorData.time.desc()).limit(100).all()
     serialized_data = [
         {
-            "time": entry.time,
+            "time": entry.time,  # Assuming entry.time is already in milliseconds
             "temperature": entry.temperature,
             "pressure": entry.pressure,
             "moisture": entry.moisture,
@@ -172,6 +172,6 @@ if __name__ == '__main__':
     mqtt_client.connect('localhost', 1883, 60)
     mqtt_client.loop_start()
     with app.app_context():
-        db.drop_all()
+        # db.drop_all()
         db.create_all()
     app.run(debug=True)
