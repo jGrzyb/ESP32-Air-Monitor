@@ -17,4 +17,6 @@ void red_led_off();
 void green_led_on();
 void green_led_off();
 
+void blink_led_task(void *pvParameters);
+
 #endif // LEDS_H

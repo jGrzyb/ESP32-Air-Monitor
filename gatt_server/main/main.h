@@ -8,6 +8,12 @@
 #include "i2c.h"
 #include "esp_sntp.h"
 #include "leds.h"
+#include "portmacro.h"
+#include "esp_mac.h"
+
+#define CONFIG_LOG_MAXIMUM_LEVEL ESP_LOG_INFO
+#define CONFIG_ESP_MAC_ADDR_UNIVERSE_WIFI_STA 1
+
 
 // on bluetooth write event
 void onBluetoothWrite_a(uint8_t* arrPtr, int len);

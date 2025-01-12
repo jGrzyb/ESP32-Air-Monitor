@@ -1,63 +1,21 @@
 dependencies:
-  espressif/catch2:
-    component_hash: 929d9f3b060c044670a666b62bdbb2acf3d5999ae72bdb2b82463bcd0746192a
+  espressif/esp_hosted:
+    component_hash: 6dd02b8e57add9907bbd28c62065d80d5a88687dc949cfcafb2557782ee46841
     dependencies:
     - name: idf
-      registry_url: https://components.espressif.com
       require: private
-      version: '>=5.0.0'
+      version: '>=5.3'
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 3.7.0
-  espressif/cmake_utilities:
-    component_hash: 351350613ceafba240b761b4ea991e0f231ac7a9f59a9ee901f751bddc0bb18f
-    dependencies:
-    - name: idf
-      registry_url: https://components.espressif.com
-      require: private
-      version: '>=4.1'
-    source:
-      registry_url: https://components.espressif.com
-      type: service
-    version: 0.5.3
-  espressif/led_indicator:
-    component_hash: f1fbe20fba9313986c32b1b6b7a4ae4822103ab928b51e9bd77215470cb70d98
-    dependencies:
-    - name: espressif/led_strip
-      registry_url: https://components.espressif.com
-      require: public
-      version: 2.5.5
-    - name: idf
-      require: private
-      version: '>=4.0'
-    - name: espressif/cmake_utilities
-      registry_url: https://components.espressif.com
-      require: private
-      version: 0.*
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    version: 1.0.0
-  espressif/led_strip:
-    component_hash: 28c6509a727ef74925b372ed404772aeedf11cce10b78c3f69b3c66799095e2d
-    dependencies:
-    - name: idf
-      registry_url: https://components.espressif.com
-      require: private
-      version: '>=4.4'
-    source:
-      registry_url: https://components.espressif.com
-      type: service
-    version: 2.5.5
+    version: 1.0.2
   idf:
     source:
       type: idf
     version: 5.3.1
 direct_dependencies:
-- espressif/catch2
-- espressif/led_indicator
+- espressif/esp_hosted
 - idf
-manifest_hash: 06f1966d30209ca5c0cc746d5e2a2e3c9374cc3c9e4eec298fb47099c446944f
+manifest_hash: f1d63a8780119dd2ecaa29052361dacbd2c89e94cdc0662672cf578b79d48717
 target: esp32
 version: 2.0.0

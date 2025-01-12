@@ -1,11 +1,14 @@
 #include "main.h"
 
+
 uint8_t ssid[32] = {0};
 uint8_t password[64] = {0};
 
 bool was_ssid_set = false;
 bool was_password_set = false;
 
+#define portTICK_PERIOD_MS ( ( TickType_t ) 1000 / CONFIG_FREERTOS_HZ )
+#define CONFIG_FREERTOS_HZ 1000
 
 
 static const char *TAG_MQTT = "mqtt_example";
@@ -157,7 +160,7 @@ void getSendData() {
     }
 }
 
-void app_main(void)
+void app_main()
 {
     red_led_on();
     green_led_on();
