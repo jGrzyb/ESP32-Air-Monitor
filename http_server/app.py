@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import paho.mqtt.client as mqtt
 import json
+import os
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -152,6 +153,18 @@ def on_message(client, userdata, msg):
         else:
             print(f"No registered device for MAC: {mac_address}")
 
+def clear_database():
+    db_path = 'app.db'
+    if os.path.exists(db_path):
+        os.remove(db_path)
+        print(f"Database {db_path} has been deleted.")
+    else:
+        print(f"Database {db_path} does not exist.")
+    
+    with app.app_context():
+        db.create_all()
+        print("Database has been recreated.")
+
 if __name__ == '__main__':
     mqtt_client.on_connect=on_connect
     mqtt_client.on_message=on_message
@@ -159,5 +172,6 @@ if __name__ == '__main__':
     mqtt_client.connect('localhost', 1883, 60)
     mqtt_client.loop_start()
     with app.app_context():
+        db.drop_all()
         db.create_all()
     app.run(debug=True)
