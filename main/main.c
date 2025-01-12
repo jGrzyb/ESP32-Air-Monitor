@@ -75,7 +75,7 @@ void onBluetoothWrite_a(uint8_t* arrPtr, int len) {
     memcpy(ssid, arrPtr, len);
     ssid[len] = '\0';
     was_ssid_set = true;
-    if_wifi_configured();
+    //if_wifi_configured();
 }
 void onBluetoothRead_a(esp_gatt_rsp_t* rsp) {
     rsp->attr_value.len = strlen((char*)ssid);
@@ -86,7 +86,7 @@ void onBluetoothWrite_b(uint8_t* arrPtr, int len) {
     memcpy(password, arrPtr, len);
     password[len] = '\0';
     was_password_set = true;
-    if_wifi_configured();
+    //if_wifi_configured();
 }
 void onBluetoothRead_b(esp_gatt_rsp_t* rsp) {
     rsp->attr_value.len = strlen((char*)password);

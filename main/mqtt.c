@@ -108,7 +108,7 @@ static void mqtt_app_start(void)
     char broker_uri[100];
     read_from_nvs(SERVER_IP, (char*)server_ip, sizeof(server_ip) - 1);
     snprintf((char *)broker_uri, sizeof(broker_uri), "mqtt://%s:1883", (char*)server_ip);
-
+    printf("broker_uri |%s|\n",broker_uri);
     esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.uri = broker_uri,
     };
