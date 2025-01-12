@@ -131,29 +131,31 @@ def on_connect(client, userdata, flags, rc):
     mqtt_client.subscribe('/esp/+/out')
 
 def on_message(client, userdata, msg):
-    print(f"Received message: {msg.payload}")
+    print(f"Received message on topic: {msg.topic}: {msg.payload}")
     topic = msg.topic
     payload = json.loads(msg.payload.decode('utf-8'))
     mac_address = topic.split('/')[2]
-    device = Device.query.filter_by(mac_address=mac_address).first()
 
-    if device:
-        new_data = SensorData(
-            device_id=device.id,
-            time=payload.get('time'),
-            temperature=payload.get('temperature'),
-            pressure=payload.get('pressure'),
-            moisture=payload.get('moisture'),
-        )
-        db.session.add(new_data)
-        db.session.commit()
-    else:
-        print(f"No registered device for MAC: {mac_address}")
+    with app.app_context():
+        device = Device.query.filter_by(mac_address=mac_address).first()
 
-mqtt_client.on_connect=on_connect
-mqtt_client.on_message=on_message
+        if device:
+            new_data = SensorData(
+                device_id=device.id,
+                time=payload.get('time'),
+                temperature=payload.get('temperature'),
+                pressure=payload.get('pressure'),
+                moisture=payload.get('moisture'),
+            )
+            db.session.add(new_data)
+            db.session.commit()
+        else:
+            print(f"No registered device for MAC: {mac_address}")
 
 if __name__ == '__main__':
+    mqtt_client.on_connect=on_connect
+    mqtt_client.on_message=on_message
+    
     mqtt_client.connect('localhost', 1883, 60)
     mqtt_client.loop_start()
     with app.app_context():
