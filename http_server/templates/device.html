@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Device Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Device Data: {{ device.mac_address }}</h1>
+    <ul>
+        {% for entry in data %}
+            <li>Time: {{ entry.time }}, Temp: {{ entry.temperature }}°C, Pressure: {{ entry.pressure }}hPa, Moisture: {{ entry.moisture }}%</li>
+        {% endfor %}
+    </ul>
+    <canvas id="temperatureChart"></canvas>
+    <canvas id="pressureChart"></canvas>
+    <canvas id="moistureChart"></canvas>
+    <script>
+        var data = JSON.parse('{{ data | tojson | safe }}');
+        var labels = data.map(d => d.time);
+
+        new Chart(document.getElementById('temperatureChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Temperature',
+                    data: data.map(d => d.temperature),
+                    borderColor: 'red',
+                    fill: false
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('pressureChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Pressure',
+                    data: data.map(d => d.pressure),
+                    borderColor: 'blue',
+                    fill: false
+                }]
+            }
+        });
+
+        new Chart(document.getElementById('moistureChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Moisture',
+                    data: data.map(d => d.moisture),
+                    borderColor: 'green',
+                    fill: false
+                }]
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, {{ current_user.username }}</h1>
+    <form method="POST">
+        <input type="text" name="mac_address" placeholder="Device MAC Address" required>
+        <button type="submit">Register Device</button>
+    </form>
+    <h2>Your Devices</h2>
+    <ul>
+        {% for device in devices %}
+            <li>
+                {{ device.mac_address }}
+                <a href="{{ url_for('device_data', mac_address=device.mac_address) }}">View Data</a>
+                <form method="POST" action="{{ url_for('delete_device') }}" style="display:inline;">
+                    <input type="hidden" name="mac_address" value="{{ device.mac_address }}">
+                    <button type="submit">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>
