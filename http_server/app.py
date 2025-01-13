@@ -157,7 +157,7 @@ def set_filter():
 @login_required
 def device_data(mac_address):
     device = Device.query.filter_by(mac_address=mac_address, user_id=current_user.id).first_or_404()
-    sensor_data = SensorData.query.filter_by(device_id=device.id).all()
+    sensor_data = SensorData.query.filter_by(device_id=device.id).order_by(SensorData.time.desc()).limit(1000).all()
     serialized_data = [
         {
             "time": entry.time,
