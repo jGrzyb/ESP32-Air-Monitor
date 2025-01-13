@@ -23,8 +23,14 @@ static uint8_t mac[6] = {0};
 static uint64_t msg_id = 0;
 static bool wifiAfterFirstConnect = false;
 
+static float min_temp = 20.0f;
+static float max_temp = 24.0f;
 
+static float min_pressure = 1000.0f;
+static float max_pressure = 1020.0f;
 
+static float min_humidity = 0.3f;
+static float max_humidity = 0.6f;
 
 void initialize_sntp(void) {
     ESP_LOGI("SNTP", "Initializing SNTP");
@@ -77,6 +83,7 @@ void onBluetoothWrite_a(uint8_t* arrPtr, int len) {
     was_ssid_set = true;
     //if_wifi_configured();
 }
+
 void onBluetoothRead_a(esp_gatt_rsp_t* rsp) {
     rsp->attr_value.len = strlen((char*)ssid);
     memcpy(rsp->attr_value.value, ssid, strlen((char*)ssid));
@@ -88,6 +95,7 @@ void onBluetoothWrite_b(uint8_t* arrPtr, int len) {
     was_password_set = true;
     //if_wifi_configured();
 }
+
 void onBluetoothRead_b(esp_gatt_rsp_t* rsp) {
     rsp->attr_value.len = strlen((char*)password);
     memcpy(rsp->attr_value.value, password, strlen((char*)password));
@@ -139,6 +147,7 @@ void onWifiConnected(void) {
         wifiAfterFirstConnect = true;
     }
 }
+
 void onWifiFailded(void) {
     // esp_restart();
 }
@@ -150,6 +159,7 @@ void onMqttConnected(esp_mqtt_client_handle_t c) {
     client = c;
     isMqttConnected = true;
 }
+
 void onMqttDisconnected() {
     isMqttConnected = false;
 }
@@ -182,6 +192,24 @@ void getSendData() {
     while(true) {
         float temperature, pressure, humidity;
         esp_err_t ret = read_sensor_data(&temperature, &pressure, &humidity);
+
+        bool is_temperature_good = (temperature >= min_temp || temperature <= max_temp);
+        bool is_pressure_good = (pressure >= min_pressure || pressure <= max_pressure);
+        bool is_humidity_good = (humidity >= min_humidity || humidity <= max_humidity);
+
+        if (is_temperature_good && is_pressure_good  && is_humidity_good) {
+            red_led_off();
+            green_led_on();
+        }
+        else if (!is_temperature_good && !is_pressure_good  && !is_humidity_good) {
+            red_led_on();
+            green_led_off();
+        }
+        else {
+            red_led_on();
+            green_led_on();
+        }
+
         ESP_LOGI("I2C", "Temperature: %.2f °C, Pressure: %.2f hPa, Humidity: %.2f %%RH", temperature, pressure, humidity);
         if(ret == ESP_OK && isMqttConnected) {
             char message[128];
@@ -235,4 +263,7 @@ void app_main(void)
     bluetoothInit();
     esp_rom_gpio_pad_select_gpio(LED_PIN);
     gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
+
+    red_led_off();
+    green_led_off();
 }
