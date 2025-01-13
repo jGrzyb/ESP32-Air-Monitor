@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Welcome, {{ current_user.username }}</h1>
-    <form method="POST">
+    <form method="POST" action="{{ url_for('dashboard') }}">
         <input type="text" name="mac_address" placeholder="Device MAC Address" required>
         <button type="submit">Register Device</button>
     </form>
@@ -19,66 +19,33 @@
                     <input type="hidden" name="mac_address" value="{{ device.mac_address }}">
                     <button type="submit">Delete</button>
                 </form>
+                <form id="tempForm" method="POST" action="{{ url_for('set_temp_limits') }}">
+                    <label for="tempMin">Temperature Min:</label>
+                    <input type="number" id="tempMin" name="tempMin" step="0.1"><br>
+                    <label for="tempMax">Temperature Max:</label>
+                    <input type="number" id="tempMax" name="tempMax" step="0.1"><br>
+                    <input type="hidden" name="device" value="{{ device.mac_address }}">
+                    <button type="submit">Submit Temperature</button>
+                </form>
+                <form id="pressureForm" method="POST" action="{{ url_for('set_pressure_limits') }}">
+                    <label for="pressureMin">Pressure Min:</label>
+                    <input type="number" id="pressureMin" name="pressureMin" step="0.1"><br>
+                    <label for="pressureMax">Pressure Max:</label>
+                    <input type="number" id="pressureMax" name="pressureMax" step="0.1"><br>
+                    <input type="hidden" name="device" value="{{ device.mac_address }}">
+                    <button type="submit">Submit Pressure</button>
+                </form>
+                <form id="humidityForm" method="POST" action="{{ url_for('set_humidity_limits') }}">
+                    <label for="humidityMin">Humidity Min:</label>
+                    <input type="number" id="humidityMin" name="humidityMin" step="0.1"><br>
+                    <label for="humidityMax">Humidity Max:</label>
+                    <input type="number" id="humidityMax" name="humidityMax" step="0.1"><br>
+                    <input type="hidden" name="device" value="{{ device.mac_address }}">
+                    <button type="submit">Submit Humidity</button>
+                </form>
             </li>
         {% endfor %}
     </ul>
-
-    <form id="tempForm">
-        <label for="tempMin">Temperature Min:</label>
-        <input type="number" id="tempMin" name="tempMin" step="0.1"><br>
-        <label for="tempMax">Temperature Max:</label>
-        <input type="number" id="tempMax" name="tempMax" step="0.1"><br>
-        <button type="submit">Submit Temperature</button>
-    </form>
-
-    <form id="pressureForm">
-        <label for="pressureMin">Pressure Min:</label>
-        <input type="number" id="pressureMin" name="pressureMin" step="0.1"><br>
-        <label for="pressureMax">Pressure Max:</label>
-        <input type="number" id="pressureMax" name="pressureMax" step="0.1"><br>
-        <button type="submit">Submit Pressure</button>
-    </form>
-
-    <form id="humidityForm">
-        <label for="humidityMin">Humidity Min:</label>
-        <input type="number" id="humidityMin" name="humidityMin" step="0.1"><br>
-        <label for="humidityMax">Humidity Max:</label>
-        <input type="number" id="humidityMax" name="humidityMax" step="0.1"><br>
-        <button type="submit">Submit Humidity</button>
-    </form>
-
-    <script src="mqtt.js"></script>
-    <script>
-        document.getElementById('tempForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const tempMin = document.getElementById('tempMin').value;
-            const tempMax = document.getElementById('tempMax').value;
-            const tempMessage = `t${tempMin} ${tempMax}`;
-            sendMQTTMessage(tempMessage);
-        });
-
-        document.getElementById('pressureForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const pressureMin = document.getElementById('pressureMin').value;
-            const pressureMax = document.getElementById('pressureMax').value;
-            const pressureMessage = `c${pressureMin} ${pressureMax}`;
-            sendMQTTMessage(pressureMessage);
-        });
-
-        document.getElementById('humidityForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const humidityMin = document.getElementById('humidityMin').value;
-            const humidityMax = document.getElementById('humidityMax').value;
-            const humidityMessage = `w${humidityMin} ${humidityMax}`;
-            sendMQTTMessage(humidityMessage);
-        });
-
-        function sendMQTTMessage(message) {
-            // Assuming you have an MQTT client setup in mqtt.js
-            mqttClient.publish('esp32/limits', message);
-        }
-    </script>
-
     <a href="{{ url_for('logout') }}">Logout</a>
 </body>
 </html>

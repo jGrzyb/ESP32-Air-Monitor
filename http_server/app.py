@@ -37,11 +37,98 @@ class SensorData(db.Model):
 # Login manager
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 @app.route('/')
+@login_required
 def index():
-    return redirect(url_for('login'))
+    devices = Device.query.filter_by(user_id=current_user.id).all()
+    return render_template('dashboard.html', devices=devices)
+
+@app.route('/register_device', methods=['POST'])
+@login_required
+def register_device():
+    mac_address = request.form['mac_address']
+    if Device.query.filter_by(mac_address=mac_address).first():
+        flash('Device already registered', 'danger')
+    else:
+        new_device = Device(mac_address=mac_address, user_id=current_user.id)
+        db.session.add(new_device)
+        db.session.commit()
+        flash('Device registered successfully', 'success')
+    return redirect(url_for('index'))
+
+@app.route('/set_limits', methods=['POST'])
+@login_required
+def set_limits():
+    device = request.form['device']
+    temp_min = request.form['tempMin']
+    temp_max = request.form['tempMax']
+    pressure_min = request.form['pressureMin']
+    pressure_max = request.form['pressureMax']
+    humidity_min = request.form['humidityMin']
+    humidity_max = request.form['humidityMax']
+
+    if temp_min and temp_max:
+        temp_message = f"t{temp_min} {temp_max}"
+        mqtt_client.publish(f'esp32/{device}/limits', temp_message)
+    
+    if pressure_min and pressure_max:
+        pressure_message = f"c{pressure_min} {pressure_max}"
+        mqtt_client.publish(f'esp32/{device}/limits', pressure_message)
+    
+    if humidity_min and humidity_max:
+        humidity_message = f"w{humidity_min} {humidity_max}"
+        mqtt_client.publish(f'esp32/{device}/limits', humidity_message)
+
+    return redirect(url_for('index'))
+
+@app.route('/set_temp_limits', methods=['POST'])
+@login_required
+def set_temp_limits():
+
+    device = request.form['device']
+    temp_min = request.form['tempMin']
+    temp_max = request.form['tempMax']
+
+    if temp_min and temp_max:
+        temp_message = f't{temp_min} {temp_max}'
+        mqtt_client.publish(f'esp32/{device}/limits', temp_message)
+
+    return redirect(url_for('index'))
+
+@app.route('/set_pressure_limits', methods=['POST'])
+@login_required
+def set_pressure_limits():
+    device = request.form['device']
+    pressure_min = request.form['pressureMin']
+    pressure_max = request.form['pressureMax']
+
+    if pressure_min and pressure_max:
+        pressure_message = f"c{pressure_min} {pressure_max}"
+        mqtt_client.publish(f'esp32/{device}/limits', pressure_message)
+
+    return redirect(url_for('index'))
+
+@app.route('/set_humidity_limits', methods=['POST'])
+@login_required
+def set_humidity_limits():
+    device = request.form['device']
+    humidity_min = request.form['humidityMin']
+    humidity_max = request.form['humidityMax']
+
+    if humidity_min and humidity_max:
+        humidity_message = f"w{humidity_min} {humidity_max}"
+        mqtt_client.publish(f'esp32/{device}/limits', humidity_message)
+
+    return redirect(url_for('index'))
+
+@app.route('/device_data/<mac_address>')
+@login_required
+def device_data(mac_address):
+    device = Device.query.filter_by(mac_address=mac_address, user_id=current_user.id).first_or_404()
+    sensor_data = SensorData.query.filter_by(device_id=device.id).all()
+    return render_template('device.html', device=device, sensor_data=sensor_data)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -51,7 +138,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.password == password:
             login_user(user)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
         flash('Invalid username or password', 'danger')
     return render_template('login.html')
 
@@ -93,25 +180,26 @@ def dashboard():
     devices = Device.query.filter_by(user_id=current_user.id).all()
     return render_template('dashboard.html', devices=devices)
 
-@app.route('/device/<mac_address>', methods=['GET'])
-@login_required
-def device_data(mac_address):
-    device = Device.query.filter_by(user_id=current_user.id, mac_address=mac_address).first()
-    if not device:
-        flash("Device not found or unauthorized access.", "danger")
-        return redirect(url_for('dashboard'))
+# Removed duplicate route definition
+# @app.route('/device/<mac_address>', methods=['GET'])
+# @login_required
+# def device_data(mac_address):
+#     device = Device.query.filter_by(user_id=current_user.id, mac_address=mac_address).first()
+#     if not device:
+#         flash("Device not found or unauthorized access.", "danger")
+#         return redirect(url_for('dashboard'))
 
-    data = SensorData.query.filter_by(device_id=device.id).order_by(SensorData.time.desc()).limit(100).all()
-    serialized_data = [
-        {
-            "time": entry.time,  # Assuming entry.time is already in milliseconds
-            "temperature": entry.temperature,
-            "pressure": entry.pressure,
-            "moisture": entry.moisture,
-        }
-        for entry in data
-    ]
-    return render_template('device.html', device=device, data=serialized_data)
+#     data = SensorData.query.filter_by(device_id=device.id).order_by(SensorData.time.desc()).limit(100).all()
+#     serialized_data = [
+#         {
+#             "time": entry.time,  # Assuming entry.time is already in milliseconds
+#             "temperature": entry.temperature,
+#             "pressure": entry.pressure,
+#             "moisture": entry.moisture,
+#         }
+#         for entry in data
+#     ]
+#     return render_template('device.html', device=device, data=serialized_data)
 
 @app.route('/delete_device', methods=['POST'])
 @login_required
@@ -166,12 +254,11 @@ def clear_database():
         print("Database has been recreated.")
 
 if __name__ == '__main__':
-    mqtt_client.on_connect=on_connect
-    mqtt_client.on_message=on_message
-    
-    mqtt_client.connect('localhost', 1883, 60)
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_message = on_message
+
+    mqtt_client.connect('127.0.0.1', 1883, 60)
     mqtt_client.loop_start()
     with app.app_context():
-        # db.drop_all()
         db.create_all()
     app.run(debug=True)
