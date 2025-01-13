@@ -51,6 +51,7 @@ static void setFreq(uint8_t f) {
     }
     ESP_LOGI(TAG_MQTT, "Send frequency set to %lu", sendFreq);
 }
+
 static void setPressureFilter(uint8_t f) {
     uint8_t config;
     switch(f) {
@@ -67,7 +68,29 @@ static void setPressureFilter(uint8_t f) {
 
 }
 
+static void setTemperatureLimits(char* data) {
+    if (sscanf(data, "%f %f", &min_temp, &max_temp) == 2) {
+        printf("Temperature should be between %.2f and %.2f\n", min_temp,max_temp);
+    } else {
+        printf("Error: Could not parse the input string.\n");
+    }
+}
 
+static void setPressureLimits(char* data) {
+    if (sscanf(data, "%f %f", &min_pressure, &max_pressure) == 2) {
+        printf("Pressure should be between %.2f and %.2f\n", min_pressure,max_pressure);
+    } else {
+        printf("Error: Could not parse the input string.\n");
+    }
+}
+
+static void setHumidityLimits(char* data) {
+    if (sscanf(data, "%f %f", &min_humidity, &max_humidity) == 2) {
+        printf("Humidity should be between %.2f and %.2f\n", min_humidity,max_humidity);
+    } else {
+        printf("Error: Could not parse the input string.\n");
+    }
+}
 
 static void if_wifi_configured() {
     if(was_ssid_set && was_password_set) {
@@ -153,8 +176,6 @@ void onWifiFailded(void) {
 }
 
 
-
-
 void onMqttConnected(esp_mqtt_client_handle_t c) {
     client = c;
     isMqttConnected = true;
@@ -182,6 +203,9 @@ void onMqttMessageReceived(char* data, int data_len, char* topic, int topic_len)
         case 'f': setFreq(data_arr[1]); break;
         case 'r': esp_restart(); break;
         case 'p': setPressureFilter(data_arr[1]); break;
+        case 't': setTemperatureLimits(data_arr[1]); break;
+        case 'c': setPressureLimits(data_arr[1]); break;
+        case 'w': setHumidityLimits(data_arr[1]); break;
         default: ESP_LOGE(TAG_MQTT, "Invalid command received: %s", data_arr); break;
     }
 
