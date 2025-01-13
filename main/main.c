@@ -92,6 +92,26 @@ static void setHumidityLimits(char* data) {
     }
 }
 
+static void writeLimits() {
+    char result[50] = {0};
+    sprintf(result, "%.2f %.2f", min_temp, max_temp);
+    save_to_nvs(LIMITS_TEMP,result);
+    sprintf(result, "%.2f %.2f", min_pressure, max_pressure);
+    save_to_nvs(LIMITS_PRESSURE,result);
+    sprintf(result, "%.2f %.2f", min_humidity, max_humidity);
+    save_to_nvs(LIMITS_HUMIDITY,result);
+}
+
+static void readLimits() {
+    char *data[12] = {0};
+    read_from_nvs(LIMITS_TEMP, data, sizeof(data) - 1);
+    setTemperatureLimits(data);
+    read_from_nvs(LIMITS_PRESSURE, data, sizeof(data) - 1);
+    setPressureLimits(data);
+    read_from_nvs(LIMITS_HUMIDITY, data, sizeof(data) - 1);
+    setHumidityLimits(data);
+}
+
 static void if_wifi_configured() {
     if(was_ssid_set && was_password_set) {
         save_to_nvs(SSID_KEY, (char*)ssid);
@@ -203,9 +223,9 @@ void onMqttMessageReceived(char* data, int data_len, char* topic, int topic_len)
         case 'f': setFreq(data_arr[1]); break;
         case 'r': esp_restart(); break;
         case 'p': setPressureFilter(data_arr[1]); break;
-        case 't': setTemperatureLimits(data_arr[1]); break;
-        case 'c': setPressureLimits(data_arr[1]); break;
-        case 'w': setHumidityLimits(data_arr[1]); break;
+        case 't': setTemperatureLimits(data_arr[1]); break;//"t0.3 0.6"
+        case 'c': setPressureLimits(data_arr[1]); break; //"c0.3 0.6"
+        case 'w': setHumidityLimits(data_arr[1]); break; //"w0.3 0.6"
         default: ESP_LOGE(TAG_MQTT, "Invalid command received: %s", data_arr); break;
     }
 
