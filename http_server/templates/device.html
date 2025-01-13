@@ -6,11 +6,11 @@
 </head>
 <body>
     <h1>Device Data: {{ device.mac_address }}</h1>
-    <ul>
+    <!-- <ul>
         {% for entry in sensor_data %}
             <li>Time: {{ entry.time }}, Temp: {{ entry.temperature }}°C, Pressure: {{ entry.pressure }}hPa, Moisture: {{ entry.moisture }}%</li>
         {% endfor %}
-    </ul>
+    </ul> -->
     <canvas id="temperatureChart"></canvas>
     <canvas id="pressureChart"></canvas>
     <canvas id="moistureChart"></canvas>
