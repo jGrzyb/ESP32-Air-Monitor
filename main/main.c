@@ -93,7 +93,7 @@ static void setHumidityLimits(char* data) {
 }
 
 static void writeLimits() {
-    char result[50] = {0};
+    char result[12] = {0};
     sprintf(result, "%.2f %.2f", min_temp, max_temp);
     save_to_nvs(LIMITS_TEMP,result);
     sprintf(result, "%.2f %.2f", min_pressure, max_pressure);
