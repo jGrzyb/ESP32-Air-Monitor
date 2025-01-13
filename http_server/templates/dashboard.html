@@ -43,6 +43,30 @@
                     <input type="hidden" name="device" value="{{ device.mac_address }}">
                     <button type="submit">Submit Humidity</button>
                 </form>
+                <form id="freqForm" method="POST" action="{{ url_for('set_freq') }}">
+                    <input type="hidden" name="device" value="{{ device.mac_address }}">
+                    <label for="freq">Select Frequency:</label>
+                    <select name="freq" id="freq">
+                        <option value="f3">low</option>
+                        <option value="f2">medium</option>
+                        <option value="f1">high</option>
+                        <option value="f0">extreme</option>
+                    </select>
+
+                    <button type="submit">Set Freq</button>
+                </form>
+                <form id="filterForm" method="POST" action="{{ url_for('set_filter') }}">
+                    <input type="hidden" name="device" value="{{ device.mac_address }}">
+                    <label for="filter">Select Filter:</label>
+                    <select name="filter" id="filter">
+                        <option value="p0">low</option>
+                        <option value="p1">medium</option>
+                        <option value="p2">high</option>
+                        <option value="p3">extreme</option>
+                    </select>
+                
+                    <button type="submit">Set Filter</button>
+                </form>
             </li>
         {% endfor %}
     </ul>

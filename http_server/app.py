@@ -123,6 +123,36 @@ def set_humidity_limits():
 
     return redirect(url_for('index'))
 
+
+@app.route('/set_freq', methods=['POST'])
+@login_required
+def set_freq():
+    device = request.form['device']
+    value = request.form['freq']
+
+    if value:
+        message = f"{value}"
+        mqtt_client.publish(f'/esp/{device}/in', message)
+    else:
+        flash('Invalid value', 'danger')
+
+    return redirect(url_for('index'))
+
+@app.route('/set_filter', methods=['POST'])
+@login_required
+def set_filter():
+    device = request.form['device']
+    value = request.form['filter']
+
+    if value:
+        message = f"{value}"
+        mqtt_client.publish(f'/esp/{device}/in', message)
+    else:
+        flash('Invalid value', 'danger')
+
+    return redirect(url_for('index'))
+
+
 @app.route('/device_data/<mac_address>')
 @login_required
 def device_data(mac_address):
