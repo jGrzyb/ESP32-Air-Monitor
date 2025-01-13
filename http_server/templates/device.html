@@ -7,7 +7,7 @@
 <body>
     <h1>Device Data: {{ device.mac_address }}</h1>
     <ul>
-        {% for entry in data %}
+        {% for entry in sensor_data %}
             <li>Time: {{ entry.time }}, Temp: {{ entry.temperature }}°C, Pressure: {{ entry.pressure }}hPa, Moisture: {{ entry.moisture }}%</li>
         {% endfor %}
     </ul>
@@ -15,7 +15,7 @@
     <canvas id="pressureChart"></canvas>
     <canvas id="moistureChart"></canvas>
     <script>
-        var data = JSON.parse('{{ data | tojson | safe }}');
+        var data = JSON.parse('{{ sensor_data | tojson | safe }}');
         data.sort((a, b) => new Date(a.time) - new Date(b.time));
         var labels = data.map(d => new Date(d.time).toString().slice(0, 24));
 

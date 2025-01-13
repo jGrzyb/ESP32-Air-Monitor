@@ -71,15 +71,15 @@ def set_limits():
 
     if temp_min and temp_max:
         temp_message = f"t{temp_min} {temp_max}"
-        mqtt_client.publish(f'esp32/{device}/limits', temp_message)
+        mqtt_client.publish(f'/esp/{device}/in', temp_message)
     
     if pressure_min and pressure_max:
         pressure_message = f"c{pressure_min} {pressure_max}"
-        mqtt_client.publish(f'esp32/{device}/limits', pressure_message)
+        mqtt_client.publish(f'/esp/{device}/in', pressure_message)
     
     if humidity_min and humidity_max:
         humidity_message = f"w{humidity_min} {humidity_max}"
-        mqtt_client.publish(f'esp32/{device}/limits', humidity_message)
+        mqtt_client.publish(f'/esp/{device}/in', humidity_message)
 
     return redirect(url_for('index'))
 
@@ -93,7 +93,7 @@ def set_temp_limits():
 
     if temp_min and temp_max:
         temp_message = f't{temp_min} {temp_max}'
-        mqtt_client.publish(f'esp32/{device}/limits', temp_message)
+        mqtt_client.publish(f'/esp/{device}/in', temp_message)
 
     return redirect(url_for('index'))
 
@@ -106,7 +106,7 @@ def set_pressure_limits():
 
     if pressure_min and pressure_max:
         pressure_message = f"c{pressure_min} {pressure_max}"
-        mqtt_client.publish(f'esp32/{device}/limits', pressure_message)
+        mqtt_client.publish(f'/esp/{device}/in', pressure_message)
 
     return redirect(url_for('index'))
 
@@ -119,7 +119,7 @@ def set_humidity_limits():
 
     if humidity_min and humidity_max:
         humidity_message = f"w{humidity_min} {humidity_max}"
-        mqtt_client.publish(f'esp32/{device}/limits', humidity_message)
+        mqtt_client.publish(f'/esp/{device}/in', humidity_message)
 
     return redirect(url_for('index'))
 
@@ -128,7 +128,16 @@ def set_humidity_limits():
 def device_data(mac_address):
     device = Device.query.filter_by(mac_address=mac_address, user_id=current_user.id).first_or_404()
     sensor_data = SensorData.query.filter_by(device_id=device.id).all()
-    return render_template('device.html', device=device, sensor_data=sensor_data)
+    serialized_data = [
+        {
+            "time": entry.time,
+            "temperature": entry.temperature,
+            "pressure": entry.pressure,
+            "moisture": entry.moisture,
+        }
+        for entry in sensor_data
+    ]
+    return render_template('device.html', device=device, sensor_data=serialized_data)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -260,5 +269,6 @@ if __name__ == '__main__':
     mqtt_client.connect('127.0.0.1', 1883, 60)
     mqtt_client.loop_start()
     with app.app_context():
+        # db.drop_all()
         db.create_all()
     app.run(debug=True)
